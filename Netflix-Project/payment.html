@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Make Payment</title>
+    <link rel="stylesheet" href="payment.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Complete Your Payment</h1>
+      <p>You selected: <span id="selected-plan"></span></p>
+      <p>Total Amount: <span id="payment-amount"></span></p>
+      <button id="pay-now-btn" class="btn">Pay Now</button>
+    </div>
+    <script>
+        // On payment.html
+        if (window.location.pathname.includes("payment.html")) {
+        const selectedPlan = localStorage.getItem("selectedPlan");
+        const paymentAmount = localStorage.getItem("paymentAmount");
+        if (!selectedPlan || !paymentAmount) {
+            alert("Invalid payment session. Redirecting to plan selection.");
+            window.location.href = "chooseplan.html";
+        } else {
+            document.getElementById("selected-plan").textContent = selectedPlan;
+            document.getElementById("payment-amount").textContent = `$${paymentAmount / 100}`;
+        }
+
+        const payNowBtn = document.getElementById("pay-now-btn");
+        if (payNowBtn) {
+            payNowBtn.addEventListener("click", () => {
+            initiatePayment(paymentAmount, selectedPlan);
+            });
+        }
+        }
+
+        // Razorpay payment function
+        async function initiatePayment(amount, plan) {
+        const options = {
+            key: "YOUR_PUBLIC_KEY", // Replace with Razorpay public key
+            amount: amount * 100, // Amount in smallest currency unit
+            currency: "INR",
+            name: "Netflix Subscription",
+            description: `Subscription Plan: ${plan}`,
+            handler: async function (response) {
+            alert("Payment successful. Payment ID: " + response.razorpay_payment_id);
+            await updateUserPaymentStatus(response.razorpay_payment_id, plan);
+            },
+            prefill: {
+            email: auth.currentUser?.email || "test@example.com",
+            },
+        };
+        const razorpay = new Razorpay(options);
+        razorpay.open();
+        }
+
+        // Update Firebase with payment details
+        async function updateUserPaymentStatus(paymentId, plan) {
+        const user = auth.currentUser;
+        if (user) {
+            const userId = user.uid;
+            const db = getFirestore();
+            await setDoc(doc(db, "users", userId), { plan, hasPaid: true, paymentId }, { merge: true });
+            alert("Payment recorded. Enjoy your subscription!");
+            window.location.href = "landing.html";
+        } else {
+            alert("Error: User not logged in.");
+            window.location.href = "signin.html";
+        }
+        }
+
+    </script>
+  </body>
+</html>

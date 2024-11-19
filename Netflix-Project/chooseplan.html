@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Choose a Plan</title>
+    <link rel="stylesheet" href="chooseplan.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Choose Your Plan</h1>
+      <div class="plans">
+        <button id="basic-plan" class="btn plan-btn">Basic Plan - $5/month</button>
+        <button id="standard-plan" class="btn plan-btn">Standard Plan - $10/month</button>
+        <button id="premium-plan" class="btn plan-btn">Premium Plan - $15/month</button>
+      </div>
+      <p>Already have an account? <a href="signin.html">Sign In</a>.</p>
+    </div>
+    <script type="module" src="Script.js"></script>
+    <script>
+        btn.addEventListener("click", () => {
+        const plan = btn.textContent.trim();
+        localStorage.setItem("selectedPlan", plan);
+        const amount = plan.includes("Basic") ? 500 : plan.includes("Standard") ? 1000 : 1500;
+        localStorage.setItem("paymentAmount", amount);
+        alert(`You selected: ${plan}`);
+        window.location.href = "payment.html";
+        });
+    </script>
+  </body>
+</html>
